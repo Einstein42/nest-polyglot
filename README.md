@@ -1,4 +1,4 @@
-# sonos-polyglot
+# nest-polyglot
 
 #Requirements
 sudo pip install python-nest
