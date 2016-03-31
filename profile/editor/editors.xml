@@ -3,9 +3,9 @@
         <range uom="2" subset="0,1" />
     </editor>
 	<editor id="nmode">
-        <range uom="67" subset="0,1,2,3,6,13" />
+        <range uom="67" subset="0,1,2,3,13" />
     </editor>
     <editor id="ntemp">
-        <range uom="17" min="50" max="100" prec="2" inc="1" />
+        <range uom="17" min="50" max="100" prec="0" />
     </editor>
 </editors>
