@@ -1,24 +1,15 @@
-# Sonos Controller
-ND-sonoscontrol-NAME = Sonos Controller
-CMD-sctl-DISCOVER-NAME = Discover Speakers
+# nest Controller
+ND-nestcontrol-NAME = Nest Controller
+CMD-nctl-DISCOVER-NAME = Re-Discover Devices
 
-# Sonos Speakers
-ND-sonosspeaker-NAME = Sonos Speaker
-ST-sspk-NAME = Speaker State
-ST-sspk-ST-NAME = Volume
-ST-sspk-GV1-NAME = Bass
-ST-sspk-GV2-NAME = Treble
-ST-sspk-GV3-NAME = GV3
-ST-sspk-GV4-NAME = GV4
+# nest Speakers
+ND-nestdevice-NAME = Nest Device
+ST-ndev-NAME = Nest Device
+ST-ndev-ST-NAME = Device Status
+ST-ndev-GV1-NAME = Inside Temp
+ST-ndev-GV2-NAME = Outside Temp
+ST-ndev-GV3-NAME = Target Temp
+ST-ndev-GV4-NAME = Online
 
-CMD-sspk-PLAY-NAME = Play
-CMD-sspk-PAUSE-NAME = Pause
-CMD-sspk-STOP-NAME = Stop
-CMD-sspk-PREVIOUS-NAME = Previous
-CMD-sspk-NEXT-NAME = Next
-CMD-sspk-MUTE-NAME = Mute
-CMD-sspk-PARTYMODE-NAME = PartyMode
-CMD-sspk-VOLUME-NAME = Volume
-CMD-sspk-BASS-NAME = Bass
-CMD-sspk-TREBLE-NAME = Treble
-
+CMD-ndev-TEMP-NAME = Target Temp
+CMD-ndev-MODE-NAME = Mode

@@ -2,7 +2,7 @@
     "name": "Nest",
     "docs": "https://www.nest.com",
     "type": "python",
-    "executable": "nest.py",
+    "executable": "polynest.py",
     "description": "Add Nest control to the ISY994.",
     "notice": "\"Nest\" is trademarked., see http://www.nest.com for more information. This Node Server is neither developed by nor endorsed by Nest.",
     "credits": [
