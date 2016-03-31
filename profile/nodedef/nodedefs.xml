@@ -1,6 +1,6 @@
 <nodeDefs>
     <!-- Sonos Control -->
-    <nodeDef id="sonoscontrol" nls="sctl">
+    <nodeDef id="nestcontrol" nls="nctl">
         <editors />
         <sts />
         <cmds>
@@ -11,32 +11,24 @@
         </cmds>
     </nodeDef>
 	<!-- Sonos Speakers -->
-    <nodeDef id="sonosspeaker" nls="sspk">
+    <nodeDef id="nestdevice" nls="ndev">
         <editors />
         <sts>
-            <st id="ST" editor="svolume" />
-			<st id="GV1" editor="sinc" /> 
-            <st id="GV2" editor="sinc" /> 
+            <st id="ST" editor="nmode" />
+			<st id="GV1" editor="ntemp" />
+            <st id="GV2" editor="ntemp" />
+			<st id="GV3" editor="ntemp" />
+			<st id="GV4" editor="nstatus" />
         </sts>
         <cmds>
             <sends />
             <accepts>
-                <cmd id="VOLUME">
-                    <p id="" editor="svolume" optional="T" init="ST" />
+                <cmd id="TEMP">
+                    <p id="" editor="ntemp" optional="T" init="GV3" />
                 </cmd	>
-                <cmd id="BASS">
-                    <p id="" editor="sinc" optional="T" init="GV1" />
-                </cmd	>
-                <cmd id="TREBLE">
-                    <p id="" editor="sinc" optional="T" init="GV2" />
-				</cmd>
-                <cmd id="PLAY" />
-				<cmd id="PAUSE" />
-                <cmd id="STOP" />
-				<cmd id="PREVIOUS" />
-				<cmd id="NEXT" />
-				<cmd id="MUTE" />
-				<cmd id="PARTYMODE" />
+                <cmd id="MODE">
+                    <p id="" editor="nmode" optional="T" init="ST" />
+				</cmd>	
             </accepts>
         </cmds>
     </nodeDef>
