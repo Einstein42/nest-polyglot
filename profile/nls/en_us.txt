@@ -1,8 +1,8 @@
-# nest Controller
+# Nest Controller
 ND-nestcontrol-NAME = Nest Controller
 CMD-nctl-DISCOVER-NAME = Re-Discover Devices
 
-# nest Speakers
+# Nest device
 ND-nestdevice-NAME = Nest Device
 ST-ndev-NAME = Nest Device
 ST-ndev-ST-NAME = Device Status
@@ -10,6 +10,16 @@ ST-ndev-GV1-NAME = Inside Temp
 ST-ndev-GV2-NAME = Outside Temp
 ST-ndev-GV3-NAME = Target Temp
 ST-ndev-GV4-NAME = Online
-
 CMD-ndev-TEMP-NAME = Target Temp
 CMD-ndev-MODE-NAME = Mode
+
+# Nest Thermostat (New)
+ND-nestthermostat-NAME = Thermostat
+PGM-CMD-143-BRT-FMT = //${c} 1\u00B0/${c} ${v}/
+PGM-CMD-143-DIM-FMT = //${c} 1\u00B0/${c} ${v}/
+ST-143-ST-NAME = Temperature
+ST-143-GV2-NAME = Outside Temp
+ST-143-GV4-NAME = Online
+CMD-143-BRT-NAME = Setpoint Up
+CMD-143-DIM-NAME = Setpoint Down
+CMD-ST-NAME = Query

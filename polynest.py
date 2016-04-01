@@ -6,7 +6,7 @@
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector
 from polynest_types import NestControl
 
-VERSION = "0.1.1"
+VERSION = "0.2.1"
 
 
 class NestNodeServer(SimpleNodeServer):
