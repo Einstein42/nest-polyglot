@@ -4,8 +4,63 @@
     </editor>
 	<editor id="nmode">
         <range uom="67" subset="0,1,2,3,13" />
-    </editor>
-    <editor id="ntemp">
+   </editor>
+   <editor id="ntemp">
         <range uom="17" min="50" max="100" prec="0" />
-    </editor>
+   </editor>
+   <!-- Temperature -->
+   <editor id="I_TEMP_DEG">
+      <range uom="14" min="-50" max="150" step="0.5" prec="1" />
+   </editor>
+
+   <editor id="I_DELTA_DEG">
+      <range uom="14" min="0" max="50" step="0.5" prec="1" init="1" />
+   </editor>
+
+   <!-- CLISPC -  Cool Setpoint -->
+   <editor id="I_CLISPC_DEG">
+      <range uom="14" min="50" max="100" />
+   </editor>
+   <editor id="I_CLISPC_C">
+      <range uom="4" min="5" max="50" />
+   </editor>
+   <editor id="I_CLISPC_F">
+      <range uom="17" min="37" max="120" />
+   </editor>
+
+   <!-- CLISPH -  Heat Setpoint -->
+   <editor id="I_CLISPH_DEG">
+      <range uom="14" min="50" max="100" />
+   </editor>
+
+   <editor id="I_CLISPH_C">
+      <range uom="4" min="0" max="45" step="0.5" prec="1" />
+   </editor>
+   <editor id="I_CLISPH_F">
+      <range uom="17" min="32" max="1200" />
+      <range uom="4" min="-10" max="500" step="0.5" prec="1" />
+   </editor>
+
+   <!-- CLIMD  -  Thermostat Mode -->
+   <editor id="I_TSTAT_MODE">
+      <range uom="67" subset="0,1,2,3,13" />
+   </editor>
+
+   <!-- CLIFS  -  Thermostat Fan Mode -->
+   <editor id="I_TSTAT_FAN_MODE">
+      <range uom="99" subset="7,8" />
+   </editor>
+
+   <!-- CLIHCS -  Thermostat Heating/Cooling State -->
+   <editor id="I_TSTAT_HCS">
+      <range uom="66" subset="0-2" />
+   </editor>
+   <editor id="I_TSTAT_HUM">
+      <range uom="51" min="0" max="100" />
+   </editor>
+   
+   <!-- LEVEL -  Beep level 0-255 -->
+   <editor id="I_BEEP_255">
+      <range uom="100" subset="0-255" />
+   </editor>
 </editors>

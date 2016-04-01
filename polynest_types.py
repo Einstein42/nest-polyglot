@@ -5,6 +5,9 @@ from nest import utils as nest_utils
 import sys
 from login import USERNAME, PASSWORD
 
+# Globally disable SSL warnings from requests package.
+requests.packages.urllib3.disable_warnings()
+
 
 NEST_STATES = {0: "off", 1: "heat", 2: "cool", 3: "range", 13: "away"}
 
@@ -87,20 +90,26 @@ class NestThermostat(Node):
         self.structurename = structurename
         self.location = location
         try:
+            self.LOGGER.info('Initializing New Thermostat')
             self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
         except requests.exceptions.HTTPError as e:
-            self.LOGGER('NestThermostat __init__ Caught exception: %s', e)            
+            self.LOGGER.error('NestThermostat __init__ Caught exception: %s', e)            
         self.away = False
         self.online = False
         self.insidetemp = nest_utils.c_to_f(temperature)
-        self.name = 'Nest ' + self.structurename + " " + self.location
+        try:
+            self.name = 'Nest ' + self.structurename + " " + self.location
+        except TypeError as e:
+            self.LOGGER.error('Caught TypeError on structurename or location, which means they don\'t exist. Using Generic name.')
+            self.name = 'Nest Thermostat'
         self.address = address
-        self.LOGGER.info("Adding new Nest Device: %s Current Temp: %.1fF", self.name, self.insidetemp)
+        self.LOGGER.info("Adding new Nest Device: %s Current Temp: %i F", self.name, self.insidetemp)
         super(NestThermostat, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
         
     def update_info(self):
         try:
+            self._checkconnect()
             for structure in self.napi.structures:
                 if self.structurename == structure.name:
                     if structure.away:
@@ -108,34 +117,52 @@ class NestThermostat(Node):
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():
                     self.mode = device.mode
+                    if device.fan:
+                        self.set_driver('CLIFS', '7')
+                    else:
+                        self.set_driver('CLIFS', '8')
                     self.online = device.online
-                    self.insidetemp = nest_utils.c_to_f(device.temperature)
-                    self.outsidetemp = nest_utils.c_to_f(self.napi.structures[0].weather.current.temperature)
-                try:
-                    self.targettemp = nest_utils.c_to_f(device.target[0])
-                    self.LOGGER.info("Target Temp is a range between %.1f and %.1f - Displaying first number only due to ISY limitation", 
-                                               nest_utils.c_to_f(device.target[0]), nest_utils.c_to_f(device.target[1]))
-                except TypeError:
-                    self.targettemp = nest_utils.c_to_f(device.target)
-                self.LOGGER.info("Mode: %s InsideTemp: %.1fF OutsideTemp: %.1fF Target: %.1fF", 
-                                           device.mode, nest_utils.c_to_f(device.temperature), self.outsidetemp, self.targettemp)
-                # TODO, clean this up into a dictionary or something clever.
-            if self.away:
-                self.set_driver('ST', '13') 
-            elif self.mode == 'range':
-                self.set_driver('ST', '3')
-            elif self.mode == 'heat':
-                self.set_driver('ST', '1')
-            elif self.mode == 'cool':
-                self.set_driver('ST', '2')
-            elif self.mode == 'fan':
-                self.set_driver('ST', '6')
-            else:
-                self.set_driver('ST', '0')
-            self.set_driver('GV1', self.insidetemp)
-            self.set_driver('GV2', self.outsidetemp)
-            self.set_driver('GV3', self.targettemp)
-            self.set_driver('GV4', self.online)
+                    self.humidity = device.humidity
+                    if device.hvac_ac_state:
+                        self.state = '2'
+                    elif device.hvac_heater_state:
+                        self.state = '1'
+                    else:
+                        self.state = '0'
+                    self.insidetemp = int(round(nest_utils.c_to_f(device.temperature)))
+                    self.outsidetemp = int(round(nest_utils.c_to_f(self.napi.structures[0].weather.current.temperature)))
+                    if self.mode == 'range':
+                        self.targetlow = int(round(nest_utils.c_to_f(device.target[0])))
+                        self.targethigh = int(round(nest_utils.c_to_f(device.target[1])))
+                        self.LOGGER.info("Target Temp is a range between %i F and %i F", 
+                                               self.targetlow, self.targethigh)
+                    else:
+                        self.targetlow = int(round(nest_utils.c_to_f(device.target)))
+                        self.LOGGER.info('Target Temp is %i F', self.targetlow)
+                        self.targethigh = self.targetlow
+
+                        # TODO, clean this up into a dictionary or something clever.
+                self.LOGGER.info("Mode: %s InsideTemp: %i F OutsideTemp: %i F TargetLow: %i F TargetHigh: %i F", 
+                                               self.mode, self.insidetemp, self.outsidetemp, self.targetlow, self.targethigh)
+                if self.away:
+                    self.set_driver('CLIMD', '13') 
+                elif self.mode == 'range':
+                    self.set_driver('CLIMD', '3')
+                elif self.mode == 'heat':
+                    self.set_driver('CLIMD', '1')
+                elif self.mode == 'cool':
+                    self.set_driver('CLIMD', '2')
+                elif self.mode == 'fan':
+                    self.set_driver('CLIMD', '6')
+                else:
+                    self.set_driver('CLIMD', '0')
+                self.set_driver('ST', int(self.insidetemp))
+                self.set_driver('CLISPC', self.targethigh)
+                self.set_driver('CLISPH', self.targetlow)
+                self.set_driver('CLIHUM', self.humidity)
+                self.set_driver('CLIHCS', self.state)
+                self.set_driver('GV2', self.outsidetemp)
+                self.set_driver('GV4', self.online)
         except requests.exceptions.HTTPError as e:
             self.LOGGER.error('NestThermostat update_info Caught exception: %s', e)
         return
@@ -158,26 +185,16 @@ class NestThermostat(Node):
             self.LOGGER.error('NestThermostat _setauto Caught exception: %s', e)
         return True
 
-    def _settemp(self, **kwargs):
-        try:
-            val = kwargs.get('value')
-            if val:
-                for device in self.napi.devices:
-                    if self.address == device.serial[-14:].lower():
-                        if device.mode == 'range':
-                            self.LOGGER.info("Mode is ranged, Setting lower bound to %.1fF", val)
-                            device.temperature = (nest_utils.f_to_c(val), device.target[1])
-                        else:
-                            self.LOGGER.info("Setting temperature to %.1fF.", val)                    
-                            device.temperature = nest_utils.f_to_c(val)
-                        self.set_driver('GV3', val, 17)
-        except requests.exceptions.HTTPError as e:
-            self.LOGGER('NestThermostat _settemp Caught exception: %s', e)
-        return True
+    def _checkconnect(self):
+        connected = self.napi.devices[0].online
+        self.LOGGER.info('Connected: %s', connected)
+        if not connected:
+            self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
 
     def _setmode(self, **kwargs):
         try:
             val = kwargs.get('value')
+            self._checkconnect()
             newstate = NEST_STATES[int(val)]
             self.LOGGER.info('Got mode change request from ISY. Setting Nest to: %s', newstate)
             if newstate == 'away':  
@@ -192,23 +209,113 @@ class NestThermostat(Node):
                 for device in self.napi.devices:
                     if self.address == device.serial[-14:].lower():       
                         device.mode = newstate
-
-            self.set_driver('ST', int(val))
+            self.set_driver('CLIMD', int(val))
+            #self.update_info()
         except requests.exceptions.HTTPError as e:
             self.LOGGER.error('NestThermostat _setauto Caught exception: %s', e)
+        return True
+
+    def _setfan(self, **kwargs):
+        try:
+            val = int(kwargs.get('value'))
+            self._checkconnect()
+            for device in self.napi.devices:
+                if self.address == device.serial[-14:].lower():
+                    if val == 7:
+                        device.fan = True
+                        self.LOGGER.info('Got Set Fan command. Setting fan to \'On\'')
+                    else:
+                        device.fan = False
+                        self.LOGGER.info('Got Set Fan command. Setting fan to \'Auto\'')
+                    self.set_driver('CLIFS', val)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat _settemp Caught exception: %s', e)
+        return True
+
+    def _sethigh(self, **kwargs):
+        inc = False
+        try:
+            try:
+                val = int(kwargs.get('value'))
+            except TypeError:
+                inc = True
+            self._checkconnect()
+            for device in self.napi.devices:
+                if self.address == device.serial[-14:].lower():
+                    if device.mode == 'range':
+                        if not inc:
+                            device.temperature = (device.target[0], nest_utils.f_to_c(val))
+                            self.LOGGER.info("Mode is ranged, Setting upper bound to %i F", val)
+                        else:
+                            val = int(nest_utils.c_to_f(device.target[1]) + 1)
+                            self.LOGGER.info("Mode is ranged, incrementing upper bound to %i F", val)
+                            device.temperature = (device.target[0], nest_utils.f_to_c(val))
+                    else:
+                        self.LOGGER.info("Setting temperature to %i F.", val)
+                        if not inc:
+                            device.temperature = int(nest_utils.f_to_c(val))
+                        else:
+                            val = int(nest_utils.c_to_f(device.target) + 1)
+                            device.temperature = nest_utils.f_to_c(val)
+                    self.set_driver('CLISPC', val)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat _settemp Caught exception: %s', e)
+        return True
+
+    def _setlow(self, **kwargs):
+        inc = False
+        try:
+            try:
+                val = int(kwargs.get('value'))
+            except TypeError:
+                inc = True
+            self._checkconnect()
+            for device in self.napi.devices:
+                if self.address == device.serial[-14:].lower():
+                    if device.mode == 'range':
+                        if not inc:
+                            device.temperature = (nest_utils.f_to_c(val), device.target[1])
+                            self.LOGGER.info("Mode is ranged, Setting lower bound to %i F", val)
+                        else:
+                            val = int(round(nest_utils.c_to_f(device.target[0]) - 1))
+                            self.LOGGER.info("Mode is ranged, decrementing lower bound to %i F", val)
+                            device.temperature = (nest_utils.f_to_c(val), device.target[1])
+                    else:
+                        self.LOGGER.info("Setting temperature to %i F.", val)
+                        if not inc:
+                            device.temperature = nest_utils.f_to_c(val)
+                        else:
+                            val = int(round(nest_utils.c_to_f(device.target) - 1))
+                            device.temperature = nest_utils.f_to_c(val)
+                    self.set_driver('CLISPH', val)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat _settemp Caught exception: %s', e)
+        return True
+
+    def _beep(self, **kwargs):
         return True
 
     def query(self, **kwargs):
         self.update_info()
         return True
 
-    _drivers = {'GV1': [0, 17, myfloat], 'GV2': [0, 17, myfloat],
-                'GV3': [0, 17, myfloat], 'GV4': [0, 2, int],
-                'ST': [0, 67, int]}
+    _drivers = {
+                'CLIMD': [0, 67, int], 'CLISPC': [0, 14, int],
+                'CLISPH': [0, 14, int], 'CLIFS':[0, 99, int],
+                'CLIHUM':[0, 51, int], 'CLIHCS':[0, 66, int],
+                'GV1': [0, 14, int], 'GV2': [0, 14, int],
+                'GV3': [0, 14, int], 'GV4': [0, 2, int],
+                'ST': [0, 14, int]}
 
     _commands = {'DON': _setauto,
                             'DOF': _setoff,
-                            'MODE': _setmode,
-                            'TEMP': _settemp}
+                            'CLIMD': _setmode,
+                            'CLIFS': _setfan,
+                            'BRT': _sethigh,
+                            'DIM': _setlow,
+                            'BEEP': _beep,
+                            'CLISPH': _setlow,
+                            'CLISPC': _sethigh,
+                            'QUERY': query}
                             
-    node_def_id = 'nestdevice'
+    node_def_id = 'nestthermostat'
