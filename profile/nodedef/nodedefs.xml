@@ -1,5 +1,5 @@
 <nodeDefs>
-    <!-- Sonos Control -->
+    <!-- Nest Control -->
     <nodeDef id="nestcontrol" nls="nctl">
         <editors />
         <sts />
@@ -10,7 +10,7 @@
 		    </accepts>
         </cmds>
     </nodeDef>
-	<!-- Sonos Speakers -->
+	<!-- Nest Thermostat -->
     <nodeDef id="nestdevice" nls="ndev">
         <editors />
         <sts>

@@ -8,9 +8,9 @@ Install:
 1. Go to your polyglot/config/node_servers/ folder
 2. git clone https://github.com/Einstein42/nest-polyglot.git
 3. cd nest-polyglot, then add your username and password
-4. echo USERNAME='<username>' >> login.py
-5. echo PASSWORD='<password>' >> login.py
-6. Restart Polyglot and add Sonos nodeserver via web interface
+4. echo USERNAME='"<username>"' >> login.py
+5. echo PASSWORD='"<password>"' >> login.py
+6. Restart Polyglot and add the Nest nodeserver via web interface
 7. Download profile and copy baseURL from polyglot
 8. Add as NodeServer in ISY. Upload profile.
 9. Reboot ISY
