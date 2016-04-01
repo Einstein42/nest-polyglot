@@ -1,8 +1,8 @@
 from polyglot.nodeserver_api import Node
 import nest
+import requests
 from nest import utils as nest_utils
 import sys
-# REMOVE 
 from login import USERNAME, PASSWORD
 
 
@@ -44,7 +44,6 @@ class NestControl(Node):
                 self.parent.poly.LOGGER.info('            Fan      : %s' % device.fan)
                 self.parent.poly.LOGGER.info('            Temp     : %0.1fF' % nest_utils.c_to_f(device.temperature))
                 self.parent.poly.LOGGER.info('            Humidity : %0.1f%%' % device.humidity)
-                #self.parent.poly.LOGGER.info('            Target   : %0.1fF' % nest_utils.c_to_f(device.target))
                 self.parent.poly.LOGGER.info('            Away Heat: %0.1fF' % nest_utils.c_to_f(device.away_temperature[0]))
                 self.parent.poly.LOGGER.info('            Away Cool: %0.1fF' % nest_utils.c_to_f(device.away_temperature[1]))
                 self.parent.poly.LOGGER.info('            hvac_ac_state         : %s' % device.hvac_ac_state)
@@ -70,9 +69,8 @@ class NestControl(Node):
                     self.parent.thermostats.append(NestThermostat(self.parent, self.parent.get_node('nestcontrol'), 
                                                                       address, device.temperature, structure.name,  device.where, manifest))
             self.parent.update_config()
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER.error('Nestcontrol _discover Caught general exception: %s', e)            
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('Nestcontrol _discover Caught exception: %s', e)            
         return True
 
     _drivers = {}
@@ -90,9 +88,8 @@ class NestThermostat(Node):
         self.location = location
         try:
             self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER('NestThermostat __init__ Caught general exception: %s', e)            
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER('NestThermostat __init__ Caught exception: %s', e)            
         self.away = False
         self.online = False
         self.insidetemp = nest_utils.c_to_f(temperature)
@@ -139,10 +136,8 @@ class NestThermostat(Node):
             self.set_driver('GV2', self.outsidetemp)
             self.set_driver('GV3', self.targettemp)
             self.set_driver('GV4', self.online)
-        # Yes I know... but this helps me narrow down the specific Exceptions. python-nest module isn't great at error catching
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER.error('NestThermostat update_info Caught general exception: %s', e)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat update_info Caught exception: %s', e)
         return
 
     def _setoff(self, **kwargs):
@@ -150,9 +145,8 @@ class NestThermostat(Node):
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():       
                     device.mode = 'off'
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER.error('NestThermostat _setoff Caught general exception: %s', e)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat _setoff Caught exception: %s', e)
         return True        
 
     def _setauto(self, **kwargs):
@@ -160,9 +154,8 @@ class NestThermostat(Node):
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():       
                     device.mode = 'range'
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER.error('NestThermostat _setauto Caught general exception: %s', e)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat _setauto Caught exception: %s', e)
         return True
 
     def _settemp(self, **kwargs):
@@ -178,9 +171,8 @@ class NestThermostat(Node):
                             self.LOGGER.info("Setting temperature to %.1fF.", val)                    
                             device.temperature = nest_utils.f_to_c(val)
                         self.set_driver('GV3', val, 17)
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER('NestThermostat _settemp Caught general exception: %s', e)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER('NestThermostat _settemp Caught exception: %s', e)
         return True
 
     def _setmode(self, **kwargs):
@@ -202,9 +194,8 @@ class NestThermostat(Node):
                         device.mode = newstate
 
             self.set_driver('ST', int(val))
-        except:
-            e = sys.exc_info()[0]
-            self.LOGGER.error('NestThermostat _setauto Caught general exception: %s', e)
+        except requests.exceptions.HTTPError as e:
+            self.LOGGER.error('NestThermostat _setauto Caught exception: %s', e)
         return True
 
     def query(self, **kwargs):
