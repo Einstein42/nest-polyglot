@@ -1,6 +1,7 @@
 # nest-polyglot
-This is the Nest Poly for the ISY Polyglot interface. 
-(c) Einstein.42 aka James Milne. MIT license. 
+This is the Nest Poly for the ISY Polyglot interface.  
+(c) Einstein.42 aka James Milne.  
+MIT license. 
 
 #Requirements
 `sudo pip install python-nest`
