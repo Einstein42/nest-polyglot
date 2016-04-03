@@ -108,12 +108,15 @@ class NestThermostat(Node):
         self.update_info()
         
     def update_info(self):
+        self.away = False
         try:
             self._checkconnect()
+            self.LOGGER.info("First structure udpate: %s", self.napi.structures[0].away)
             for structure in self.napi.structures:
                 if self.structurename == structure.name:
                     if structure.away:
                         self.away = True
+                    self.LOGGER.info('Us: %s Them: %s', self.away, structure.away)
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():
                     self.mode = device.mode
@@ -142,8 +145,8 @@ class NestThermostat(Node):
                         self.targethigh = self.targetlow
 
                         # TODO, clean this up into a dictionary or something clever.
-                self.LOGGER.info("Mode: %s InsideTemp: %i F OutsideTemp: %i F TargetLow: %i F TargetHigh: %i F", 
-                                               self.mode, self.insidetemp, self.outsidetemp, self.targetlow, self.targethigh)
+                self.LOGGER.info("Away %s: Mode: %s InsideTemp: %i F OutsideTemp: %i F TargetLow: %i F TargetHigh: %i F", 
+                                               self.away, self.mode, self.insidetemp, self.outsidetemp, self.targetlow, self.targethigh)
                 if self.away:
                     self.set_driver('CLIMD', '13') 
                 elif self.mode == 'range':
