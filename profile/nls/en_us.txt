@@ -1,5 +1,6 @@
 # Nest Controller
 ND-nestcontrol-NAME = Nest Controller
+ND-nestcontrol-ICON = Thermostat
 CMD-nctl-DISCOVER-NAME = Re-Discover Devices
 
 # Nest device
@@ -15,6 +16,7 @@ CMD-ndev-MODE-NAME = Mode
 
 # Nest Thermostat (New)
 ND-nestthermostat-NAME = Thermostat
+ND-nestthermostat-ICON = Thermostat
 PGM-CMD-143-BRT-FMT = //${c} 1\u00B0/${c} ${v}/
 PGM-CMD-143-DIM-FMT = //${c} 1\u00B0/${c} ${v}/
 ST-143-ST-NAME = Temperature
