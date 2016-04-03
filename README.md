@@ -7,9 +7,9 @@ This is the Nest Poly for the ISY Polyglot interface.
 
 Install:
 
-1. Go to your polyglot/config/node_servers/ folder
-```git clone https://github.com/Einstein42/nest-polyglot.git
-cd nest-polyglot```
+1. Go to your polyglot/config/node_servers/ folder.
+..* > git clone https://github.com/Einstein42/nest-polyglot.git
+..* > cd nest-polyglot
 2. Add your username and password to a new file called login.py
 
 > echo USERNAME='"<username>"' >> login.py
