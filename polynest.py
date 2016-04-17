@@ -6,7 +6,7 @@
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector
 from polynest_types import NestControl
 
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 
 class NestNodeServer(SimpleNodeServer):
@@ -17,7 +17,7 @@ class NestNodeServer(SimpleNodeServer):
     def setup(self):
         manifest = self.config.get('manifest',{})
         self.controller = NestControl(self,'nestcontrol','Nest Control', True, manifest)
-        self.poly.LOGGER.info("FROM Poly ISYVER: " + self.poly.isyver)
+        self.poly.logger.info("FROM Poly ISYVER: " + self.poly.isyver)
         self.controller._discover()
         self.update_config()
         
@@ -37,9 +37,9 @@ def main():
     nserver = NestNodeServer(poly, 5, 30)
     poly.connect()
     poly.wait_for_config()
-    poly.LOGGER.info("Nest Interface version " + VERSION + " created. Initiating setup.")
+    poly.logger.info("Nest Interface version " + VERSION + " created. Initiating setup.")
     nserver.setup()
-    poly.LOGGER.info("Setup completed. Running Server.")
+    poly.logger.info("Setup completed. Running Server.")
     nserver.run()
     
 if __name__ == "__main__":
