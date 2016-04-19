@@ -48,7 +48,7 @@
 
    <!-- CLIFS  -  Thermostat Fan Mode -->
    <editor id="I_TSTAT_FAN_MODE">
-      <range uom="99" subset="7,8" />
+      <range uom="68" subset="0-7" />
    </editor>
 
    <!-- CLIHCS -  Thermostat Heating/Cooling State -->

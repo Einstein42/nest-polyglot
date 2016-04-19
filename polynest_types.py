@@ -127,9 +127,9 @@ class NestThermostat(Node):
                 if self.address == device.serial[-14:].lower():
                     self.mode = device.mode
                     if device.fan:
-                        self.set_driver('CLIFS', '7')
+                        self.set_driver('CLIFS', '1')
                     else:
-                        self.set_driver('CLIFS', '8')
+                        self.set_driver('CLIFS', '0')
                     self.online = device.online
                     self.humidity = device.humidity
                     if device.hvac_ac_state:
@@ -230,7 +230,7 @@ class NestThermostat(Node):
             self._checkconnect()
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():
-                    if val == 7:
+                    if val == 1:
                         device.fan = True
                         self.logger.info('Got Set Fan command. Setting fan to \'On\'')
                     else:
