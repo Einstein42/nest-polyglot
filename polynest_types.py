@@ -127,9 +127,9 @@ class NestThermostat(Node):
                 if self.address == device.serial[-14:].lower():
                     self.mode = device.mode
                     if device.fan:
-                        self.set_driver('CLIFS', '7')
+                        self.set_driver('CLIFS', '1')
                     else:
-                        self.set_driver('CLIFS', '8')
+                        self.set_driver('CLIFS', '0')
                     self.online = device.online
                     self.humidity = device.humidity
                     if device.hvac_ac_state:
