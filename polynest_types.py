@@ -230,7 +230,7 @@ class NestThermostat(Node):
             self._checkconnect()
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():
-                    if val == 7:
+                    if val == 1:
                         device.fan = True
                         self.logger.info('Got Set Fan command. Setting fan to \'On\'')
                     else:
