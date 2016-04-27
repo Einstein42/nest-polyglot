@@ -195,10 +195,13 @@ class NestThermostat(Node):
         return True
 
     def _checkconnect(self):
-        connected = self.napi.devices[0].online
-        self.logger.info('Connected: %s', connected)
-        if not connected:
-            self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
+        try:
+            connected = self.napi.devices[0].online
+            self.logger.info('Connected: %s', connected)
+            if not connected:
+                self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, TypeError) as e:
+            self.logger.error('CheckConnect: %s', e)
 
     def _setmode(self, **kwargs):
         try:
