@@ -29,6 +29,7 @@ class NestControl(Node):
             for structure in self.napi.structures:
                 try:
                     self.parent.poly.logger.info('Structure   : %s' % structure.name)
+                    """
                     self.parent.poly.logger.info(' Away        : %s' % structure.away)
                     self.parent.poly.logger.info(' Postal Code                    : %s' % structure.postal_code)
                     self.parent.poly.logger.info(' Country                        : %s' % structure.country_code)
@@ -41,11 +42,13 @@ class NestControl(Node):
                     self.parent.poly.logger.info(' measurement_scale              : %s' % structure.measurement_scale)
                     self.parent.poly.logger.info(' renovation_date                : %s' % structure.renovation_date)
                     self.parent.poly.logger.info(' structure_area                 : %s' % structure.structure_area)
+                    """
                 except TypeError as e:
                     self.parent.poly.logger.info('Nestcontrol _discover Caught exception: %s', e)
             for device in self.napi.devices:
                 try:
                     self.parent.poly.logger.info('        Device: %s' % device.serial[-14:])
+                    """
                     self.parent.poly.logger.info('        Where: %s' % device.where)
                     self.parent.poly.logger.info('            Mode     : %s' % device.mode)
                     self.parent.poly.logger.info('            Fan      : %s' % device.fan)
@@ -68,6 +71,7 @@ class NestControl(Node):
                     self.parent.poly.logger.info('            last_connection       : %s' % device.last_connection)
                     self.parent.poly.logger.info('            error_code            : %s' % device.error_code)
                     self.parent.poly.logger.info('            battery_level         : %s' % device.battery_level)
+                    """
                 except TypeError as e:
                     self.parent.poly.logger.info('Nestcontrol _discover Caught exception: %s', e)
                 # ISY only allows 14 character limit on nodes, have to strip the serial number down to the last 14 chars. 
