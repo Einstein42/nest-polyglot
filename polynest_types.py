@@ -25,7 +25,7 @@ class NestControl(Node):
             manifest = self.parent.config.get('manifest', {})
             self.parent.poly.logger.info("Discovering Nest Products...")
             self.parent.poly.logger.info("User: %s", USERNAME)
-            self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
+            self.napi = nest.Nest(USERNAME,PASSWORD, cache_ttl=30, local_time=True)
             for structure in self.napi.structures:
                 try:
                     self.parent.poly.logger.info('Structure   : %s' % structure.name)
@@ -47,7 +47,7 @@ class NestControl(Node):
                     self.parent.poly.logger.info('Nestcontrol _discover Caught exception: %s', e)
             for device in self.napi.devices:
                 try:
-                    self.parent.poly.logger.info('        Device: %s' % device.serial[-14:])
+                    self.parent.poly.logger.info('Device: %s' % device.serial[-14:])
                     """
                     self.parent.poly.logger.info('        Where: %s' % device.where)
                     self.parent.poly.logger.info('            Mode     : %s' % device.mode)
@@ -121,12 +121,11 @@ class NestThermostat(Node):
         self.away = False
         try:
             self._checkconnect()
-            self.logger.info("First structure udpate: %s", self.napi.structures[0].away)
+            self.logger.info("First structure update: %s", self.napi.structures[0].away)
             for structure in self.napi.structures:
                 if self.structurename == structure.name:
                     if structure.away:
                         self.away = True
-                    self.logger.info('Us: %s Them: %s', self.away, structure.away)
             for device in self.napi.devices:
                 if self.address == device.serial[-14:].lower():
                     self.mode = device.mode
@@ -204,29 +203,31 @@ class NestThermostat(Node):
             self.logger.info('Connected: %s', connected)
             if not connected:
                 self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
+            return True
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, TypeError) as e:
             self.logger.error('CheckConnect: %s', e)
+            return False
 
     def _setmode(self, **kwargs):
         try:
             val = kwargs.get('value')
-            self._checkconnect()
-            newstate = NEST_STATES[int(val)]
-            self.logger.info('Got mode change request from ISY. Setting Nest to: %s', newstate)
-            if newstate == 'away':  
-                for structure in self.napi.structures:
-                    if self.structurename == structure.name:
-                        structure.away = True
-            else:
-                for structure in self.napi.structures:
-                    if self.structurename == structure.name:
-                        structure.away = False
-                        self.away = False
-                for device in self.napi.devices:
-                    if self.address == device.serial[-14:].lower():       
-                        device.mode = newstate
-            self.set_driver('CLIMD', int(val))
-            #self.update_info()
+            if self._checkconnect():
+                newstate = NEST_STATES[int(val)]
+                self.logger.info('Got mode change request from ISY. Setting Nest to: %s', newstate)
+                if newstate == 'away':  
+                    for structure in self.napi.structures:
+                        if self.structurename == structure.name:
+                            structure.away = True
+                else:
+                    for structure in self.napi.structures:
+                        if self.structurename == structure.name:
+                            structure.away = False
+                            self.away = False
+                    for device in self.napi.devices:
+                        if self.address == device.serial[-14:].lower():       
+                            device.mode = newstate
+                self.set_driver('CLIMD', int(val))
+                #self.update_info()
         except requests.exceptions.HTTPError as e:
             self.logger.error('NestThermostat _setauto Caught exception: %s', e)
         return True
@@ -234,16 +235,16 @@ class NestThermostat(Node):
     def _setfan(self, **kwargs):
         try:
             val = int(kwargs.get('value'))
-            self._checkconnect()
-            for device in self.napi.devices:
-                if self.address == device.serial[-14:].lower():
-                    if val == 1:
-                        device.fan = True
-                        self.logger.info('Got Set Fan command. Setting fan to \'On\'')
-                    else:
-                        device.fan = False
-                        self.logger.info('Got Set Fan command. Setting fan to \'Auto\'')
-                    self.set_driver('CLIFS', val)
+            if self._checkconnect():
+                for device in self.napi.devices:
+                    if self.address == device.serial[-14:].lower():
+                        if val == 1:
+                            device.fan = True
+                            self.logger.info('Got Set Fan command. Setting fan to \'On\'')
+                        else:
+                            device.fan = False
+                            self.logger.info('Got Set Fan command. Setting fan to \'Auto\'')
+                        self.set_driver('CLIFS', val)
         except requests.exceptions.HTTPError as e:
             self.logger.error('NestThermostat _settemp Caught exception: %s', e)
         return True
