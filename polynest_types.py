@@ -82,8 +82,12 @@ class NestControl(Node):
                     self.parent.thermostats.append(NestThermostat(self.parent, self.parent.get_node('nestcontrol'), 
                                                                       address, device.temperature, structure.name,  device.where, manifest))
             self.parent.update_config()
-        except (requests.exceptions.HTTPError, TypeError) as e:
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, TypeError) as e:
             self.logger.error('Nestcontrol _discover Caught exception: %s', e)
+        return True
+        
+    def query(self, **kwargs):
+        self.parent.report_drivers()
         return True
 
     _drivers = {}
@@ -175,7 +179,7 @@ class NestThermostat(Node):
                     self.set_driver('CLIHCS', self.state)
                     self.set_driver('GV2', self.outsidetemp)
                     self.set_driver('GV4', self.online)
-        except requests.exceptions.HTTPError as e:
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
             self.logger.error('NestThermostat update_info Caught exception: %s', e)
         return
 
@@ -314,6 +318,7 @@ class NestThermostat(Node):
 
     def query(self, **kwargs):
         self.update_info()
+        self.report_driver()
         return True
 
     _drivers = {

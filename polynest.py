@@ -6,7 +6,7 @@
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector
 from polynest_types import NestControl
 
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 
 
 class NestNodeServer(SimpleNodeServer):
@@ -28,7 +28,11 @@ class NestNodeServer(SimpleNodeServer):
         if len(self.thermostats) >= 1:
             for i in self.thermostats:
                 i.update_info()        
-        pass
+
+    def report_drivers(self):
+        if len(self.thermostats) >= 1:
+            for i in self.thermostats:
+                i.report_driver()
         
 def main():
     # Setup connection, node server, and nodes

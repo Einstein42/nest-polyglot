@@ -9,8 +9,8 @@
         {
             "title": "nest: A Python library for Nest",
             "author": "James Milne (Einstein.42)",
-            "version": "0.2.2",
-            "date": "April 17, 2016",
+            "version": "0.2.3",
+            "date": "July 2nd, 2016",
             "source": "https://github.com/Einstein42/nest-polyglot",
             "license": "https://github.com/Einstein42/nest-polyglot/blob/master/LICENSE"
         }
