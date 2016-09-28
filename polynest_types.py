@@ -146,7 +146,11 @@ class NestThermostat(Node):
                     else:
                         self.state = '0'
                     self.insidetemp = int(round(nest_utils.c_to_f(device.temperature)))
-                    self.outsidetemp = int(round(nest_utils.c_to_f(self.napi.structures[0].weather.current.temperature)))
+                    try:
+                        self.outsidetemp = int(round(nest_utils.c_to_f(self.napi.structures[0].weather.current.temperature)))
+                    except (TypeError) as e:
+                        self.logger.error('NestThermostat update_info Caught an exception: %s', e)
+                        self.outsidetemp = 0
                     if self.mode == 'range':
                         self.targetlow = int(round(nest_utils.c_to_f(device.target[0])))
                         self.targethigh = int(round(nest_utils.c_to_f(device.target[1])))
