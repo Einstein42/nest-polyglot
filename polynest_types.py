@@ -212,7 +212,7 @@ class NestThermostat(Node):
             if not connected:
                 self.napi = nest.Nest(USERNAME,PASSWORD, local_time=True)
             return True
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, TypeError) as e:
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, TypeError, requests.exceptions.ReadTimeout) as e:
             self.logger.error('CheckConnect: %s', e)
             return False
 
@@ -276,12 +276,12 @@ class NestThermostat(Node):
                             self.logger.info("Mode is ranged, incrementing upper bound to %i F", val)
                             device.temperature = (device.target[0], nest_utils.f_to_c(val))
                     else:
-                        self.logger.info("Setting temperature to %i F.", val)
                         if not inc:
                             device.temperature = int(nest_utils.f_to_c(val))
                         else:
                             val = int(nest_utils.c_to_f(device.target) + 1)
                             device.temperature = nest_utils.f_to_c(val)
+                        self.logger.info("Setting temperature to %i F.", val)
                     self.set_driver('CLISPC', val)
         except requests.exceptions.HTTPError as e:
             self.logger.error('NestThermostat _settemp Caught exception: %s', e)
@@ -289,6 +289,7 @@ class NestThermostat(Node):
 
     def _setlow(self, **kwargs):
         inc = False
+        val = None
         try:
             try:
                 val = int(kwargs.get('value'))
@@ -306,12 +307,12 @@ class NestThermostat(Node):
                             self.logger.info("Mode is ranged, decrementing lower bound to %i F", val)
                             device.temperature = (nest_utils.f_to_c(val), device.target[1])
                     else:
-                        self.logger.info("Setting temperature to %i F.", val)
                         if not inc:
                             device.temperature = nest_utils.f_to_c(val)
                         else:
                             val = int(round(nest_utils.c_to_f(device.target) - 1))
                             device.temperature = nest_utils.f_to_c(val)
+                        self.logger.info("Setting temperature to %i F.", val)
                     self.set_driver('CLISPH', val)
         except requests.exceptions.HTTPError as e:
             self.logger.error('NestThermostat _settemp Caught exception: %s', e)
