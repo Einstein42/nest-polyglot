@@ -4,7 +4,7 @@ This is the Nest Poly for the ISY Polyglot interface.
 MIT license. 
 
 #Requirements
-`sudo pip install python-nest`
+`sudo pip install python-nest==2.11.0`
 
 Install:
 
